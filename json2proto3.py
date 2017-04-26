@@ -94,6 +94,24 @@ def add_message(name, msgdef, typeonly = False):
 def add_type(name, typedef):
     return add_message('vl_api_' + name + '_t', typedef, typeonly=True)
 
+def print_services():
+    print('service', module, '{')
+    for name, msgdef in messages.iteritems():
+        if messages[name]['typeonly']:
+            continue
+        if name.endswith('_reply') or name.endswith('_details'):
+            continue
+        if name.endswith('_dump'):
+            reply = name.rstrip('_dump') + '_details'
+        else:
+            reply = name + '_reply'
+        request = name + '_request'
+        if not reply in messages:
+            print('// WARNING Cannot find reply matching request ' + request + ' ' + reply)
+            continue
+        print('  rpc ' + name + ' (' + request + ') returns (' + reply + ');')
+    print('}')
+
 
 #
 # Main
@@ -101,6 +119,12 @@ def add_type(name, typedef):
 
 parser = argparse.ArgumentParser()
 parser.add_argument('jsonfile')
+parser.add_argument('--services', dest='services', action='store_true',
+                    help="Produce GRPC services section")
+parser.add_argument('--no-services', dest='services', action='store_false',
+                    help="Do not produce GRPC services section")
+parser.set_defaults(services=True)
+
 args = parser.parse_args()
 
 with open(args.jsonfile) as apidef_file:
@@ -143,19 +167,5 @@ for name, msgdef in messages.iteritems():
 #
 # Generate services
 #
-print('service', module, '{')
-for name, msgdef in messages.iteritems():
-    if messages[name]['typeonly']:
-        continue
-    if name.endswith('_reply') or name.endswith('_details'):
-        continue
-    if name.endswith('_dump'):
-        reply = name.rstrip('_dump') + '_details'
-    else:
-        reply = name + '_reply'
-    request = name + '_request'
-    if not reply in messages:
-        print('// WARNING Cannot find reply matching request ' + request + ' ' + reply)
-        continue
-    print('  rpc ' + name + ' (' + request + ') returns (' + reply + ');')
-print('}')
+if args.services:
+    print_services()
