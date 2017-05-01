@@ -35,7 +35,7 @@ def __struct (t, n = None, e = -1, vl = None):
         if e >= 0:
             return 'repeated ' + base_types[t]
         else:
-            return 'required ' + base_types[t]
+            return base_types[t]
 
     if t in messages:
         ### Return a list in case of array ###
@@ -94,78 +94,111 @@ def add_message(name, msgdef, typeonly = False):
 def add_type(name, typedef):
     return add_message('vl_api_' + name + '_t', typedef, typeonly=True)
 
-def print_services():
-    print('service', module, '{')
+def print_pubsub_services():
+    print('service', module + '_subscribe', '{')
     for name, msgdef in messages.iteritems():
         if messages[name]['typeonly']:
             continue
         if name.endswith('_reply') or name.endswith('_details'):
             continue
-        if name.endswith('_dump'):
-            reply = name.rstrip('_dump') + '_details'
-        else:
+        if name.startswith('want_'):
             reply = name + '_reply'
+        else:
+            continue
         request = name + '_request'
         if not reply in messages:
             print('// WARNING Cannot find reply matching request ' + request + ' ' + reply)
             continue
-        print('  rpc ' + name + ' (' + request + ') returns (' + reply + ');')
+        print('  rpc ' + name + ' (' + request + ') returns (' +  reply + ');')
     print('}')
 
+def print_req_response_services():
+    print('service', module, '{')
+    for name, msgdef in messages.iteritems():
+        if messages[name]['typeonly']:
+            continue
+        if name.startswith('want_'):
+            continue
+        if name.endswith('_reply') or name.endswith('_details'):
+            continue
+        if name.endswith('_dump'):
+            reply = name.rstrip('_dump') + '_details'
+            stream = 'stream '
+        else:
+            reply = name + '_reply'
+            stream = ''
+        request = name + '_request'
+        if not reply in messages:
+            print('// WARNING Cannot find reply matching request ' + request + ' ' + reply)
+            continue
+        print('  rpc ' + name + ' (' + request + ') returns (' + stream + reply + ');')
+    print('}')
 
+def print_services():
+   print_req_response_services()
+   print_pubsub_services()
 #
 # Main
 #
+def vppprotogen(command_arguments):
+    global module
+    parser = argparse.ArgumentParser()
+    parser.add_argument('jsonfile')
+    parser.add_argument('--services', dest='services', action='store_true',
+                        help="Produce GRPC services section")
+    parser.add_argument('--no-services', dest='services', action='store_false',
+                        help="Do not produce GRPC services section")
+    parser.set_defaults(services=True)
 
-parser = argparse.ArgumentParser()
-parser.add_argument('jsonfile')
-parser.add_argument('--services', dest='services', action='store_true',
-                    help="Produce GRPC services section")
-parser.add_argument('--no-services', dest='services', action='store_false',
-                    help="Do not produce GRPC services section")
-parser.set_defaults(services=True)
+    args = parser.parse_args(command_arguments)
+    with open(args.jsonfile) as apidef_file:
+        api = json.load(apidef_file)
+        for t in api['types']:
+            add_type(t[0], t[1:])
 
-args = parser.parse_args()
+        for m in api['messages']:
+            add_message(m[0], m[1:])
 
-with open(args.jsonfile) as apidef_file:
-    api = json.load(apidef_file)
-    for t in api['types']:
-        add_type(t[0], t[1:])
-        
-    for m in api['messages']:
-        add_message(m[0], m[1:])
-
-module = args.jsonfile.split('.', 1)[0]
-
-print('// File:', args.jsonfile)
-#
-# Generate messages
-#
-for name, msgdef in messages.iteritems():
-    count = 1
-    if not name.endswith('_reply') and not name.endswith('_details') and not messages[name]['typeonly']:
-        name_req = name + '_request'
-    else:
-        name_req = name
-    if messages[name]['typeonly']:
-        print('// Type')
-    print('message', name_req, '{')
-    for k,v in msgdef['args'].iteritems():
-        # XXX: _comment stuff is a bit of a hack...
-        if k.endswith('_comment'):
-            continue
-        if type(v) is list:
-            raise ValueError(1, 'Wrong list')
-        if k + '_comment' in msgdef['args']:
-            comment = ' // ' + msgdef['args'][k + '_comment']
+    module = args.jsonfile.split('.', 1)[0]
+    module = module.split('/')[-1:][0]
+    orig_stdout = sys.stdout
+    f = open(module+'.proto', 'w')
+    sys.stdout = f
+    print('// File:', args.jsonfile)
+    print('syntax = "proto3";')
+    #
+    # Generate messages
+    #
+    for name, msgdef in messages.iteritems():
+        count = 1
+        if not name.endswith('_reply') and not name.endswith('_details') and not messages[name]['typeonly']:
+            name_req = name + '_request'
         else:
-            comment = ''
-        print (' ', v, k, '=', str(count) + ';' + comment)
-        count += 1
-    print('}')
+            name_req = name
+        if messages[name]['typeonly']:
+            print('// Type')
+        print('message', name_req, '{')
+        for k,v in msgdef['args'].iteritems():
+            # XXX: _comment stuff is a bit of a hack...
+            if k.endswith('_comment'):
+                continue
+            if type(v) is list:
+                raise ValueError(1, 'Wrong list')
+            if k + '_comment' in msgdef['args']:
+                comment = ' // ' + msgdef['args'][k + '_comment']
+            else:
+                comment = ''
+            print (' ', v, k, '=', str(count) + ';' + comment)
+            count += 1
+        print('}')
 
-#
-# Generate services
-#
-if args.services:
-    print_services()
+    #
+    # Generate services
+    #
+    if args.services:
+        print_services()
+    sys.stdout = orig_stdout
+    f.close()
+
+if __name__ == '__main__':
+    sys.exit(vppprotogen(sys.argv[1:]))
