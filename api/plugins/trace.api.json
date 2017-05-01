@@ -1,0 +1,54 @@
+{
+    "types" : [
+
+    ],
+    "messages" : [
+        ["trace_profile_add",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u8", "trace_type"],
+            ["u8", "num_elts"],
+            ["u8", "trace_tsp"],
+            ["u32", "node_id"],
+            ["u32", "app_data"],
+            {"crc" : "0xc6300bd4"}
+        ],
+        ["trace_profile_add_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0xfcf91946"}
+        ],
+        ["trace_profile_del",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            {"crc" : "0x94b1447f"}
+        ],
+        ["trace_profile_del_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0xd04895a4"}
+        ],
+        ["trace_profile_show_config",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            {"crc" : "0x983f7b0c"}
+        ],
+        ["trace_profile_show_config_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            ["u8", "trace_type"],
+            ["u8", "num_elts"],
+            ["u8", "trace_tsp"],
+            ["u32", "node_id"],
+            ["u32", "app_data"],
+            {"crc" : "0x4f6f9bdd"}
+        ]
+    ],
+"vl_api_version" :"0x715b0386"
+}

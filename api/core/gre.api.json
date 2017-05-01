@@ -1,0 +1,45 @@
+{
+    "types" : [
+
+    ],
+    "messages" : [
+        ["gre_add_del_tunnel",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u8", "is_add"],
+            ["u8", "is_ipv6"],
+            ["u8", "teb"],
+            ["u8", "src_address", 16],
+            ["u8", "dst_address", 16],
+            ["u32", "outer_fib_id"],
+            {"crc" : "0x8ab92528"}
+        ],
+        ["gre_add_del_tunnel_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            ["u32", "sw_if_index"],
+            {"crc" : "0x754a5956"}
+        ],
+        ["gre_tunnel_dump",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u32", "sw_if_index"],
+            {"crc" : "0x23d04dc0"}
+        ],
+        ["gre_tunnel_details",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["u32", "sw_if_index"],
+            ["u8", "is_ipv6"],
+            ["u8", "teb"],
+            ["u8", "src_address", 16],
+            ["u8", "dst_address", 16],
+            ["u32", "outer_fib_id"],
+            {"crc" : "0xdd1d50aa"}
+        ]
+    ],
+"vl_api_version" :"0x6a50ea63"
+}

@@ -1,0 +1,49 @@
+{
+    "types" : [
+
+    ],
+    "messages" : [
+        ["vxlan_gpe_add_del_tunnel",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u8", "is_ipv6"],
+            ["u8", "local", 16],
+            ["u8", "remote", 16],
+            ["u32", "encap_vrf_id"],
+            ["u32", "decap_vrf_id"],
+            ["u8", "protocol"],
+            ["u32", "vni"],
+            ["u8", "is_add"],
+            {"crc" : "0x39488c0f"}
+        ],
+        ["vxlan_gpe_add_del_tunnel_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            ["u32", "sw_if_index"],
+            {"crc" : "0x563fedf9"}
+        ],
+        ["vxlan_gpe_tunnel_dump",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u32", "sw_if_index"],
+            {"crc" : "0x14423443"}
+        ],
+        ["vxlan_gpe_tunnel_details",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["u32", "sw_if_index"],
+            ["u8", "local", 16],
+            ["u8", "remote", 16],
+            ["u32", "vni"],
+            ["u8", "protocol"],
+            ["u32", "encap_vrf_id"],
+            ["u32", "decap_vrf_id"],
+            ["u8", "is_ipv6"],
+            {"crc" : "0xda8ca593"}
+        ]
+    ],
+"vl_api_version" :"0xf2ec9253"
+}

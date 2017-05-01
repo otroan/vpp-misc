@@ -1,0 +1,103 @@
+{
+    "types" : [
+
+    ],
+    "messages" : [
+        ["vxlan_gpe_ioam_enable",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u16", "id"],
+            ["u8", "trace_ppc"],
+            ["u8", "pow_enable"],
+            ["u8", "trace_enable"],
+            {"crc" : "0x6bf84bd6"}
+        ],
+        ["vxlan_gpe_ioam_enable_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0xca79fc00"}
+        ],
+        ["vxlan_gpe_ioam_disable",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u16", "id"],
+            {"crc" : "0x1a373a3b"}
+        ],
+        ["vxlan_gpe_ioam_disable_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0x711375e4"}
+        ],
+        ["vxlan_gpe_ioam_vni_enable",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u32", "vni"],
+            ["u8", "local", 16],
+            ["u8", "remote", 16],
+            ["u8", "is_ipv6"],
+            {"crc" : "0x489195ec"}
+        ],
+        ["vxlan_gpe_ioam_vni_enable_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0x6a273d6e"}
+        ],
+        ["vxlan_gpe_ioam_vni_disable",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u32", "vni"],
+            ["u8", "local", 16],
+            ["u8", "remote", 16],
+            ["u8", "is_ipv6"],
+            {"crc" : "0x27392af3"}
+        ],
+        ["vxlan_gpe_ioam_vni_disable_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0x2e8d61fa"}
+        ],
+        ["vxlan_gpe_ioam_transit_enable",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u32", "outer_fib_index"],
+            ["u8", "dst_addr", 16],
+            ["u8", "is_ipv6"],
+            {"crc" : "0x2c399a17"}
+        ],
+        ["vxlan_gpe_ioam_transit_enable_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0x4dc0cf51"}
+        ],
+        ["vxlan_gpe_ioam_transit_disable",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u32", "outer_fib_index"],
+            ["u8", "dst_addr", 16],
+            ["u8", "is_ipv6"],
+            {"crc" : "0xee3cf5f9"}
+        ],
+        ["vxlan_gpe_ioam_transit_disable_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0x405af39d"}
+        ]
+    ],
+"vl_api_version" :"0xd6f1ab7b"
+}
