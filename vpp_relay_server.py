@@ -17,10 +17,10 @@ def grpcmsg_to_namedtuple(obj):
     value = getattr(obj, i.name)
     if not i.name in ["_vl_msg_id", "context", "client_index"]:
       if i.type == 12: #repeated bytes
-        pr[i.name] = str(value)
+        pr[i.name] = bytes(bytearray(value))
       else:
         pr[i.name] = value
-   # print (' %s: %s' % (i.type, i.name))
+      #print (' %s: %s = %s' % (i.type, i.name, pr[i.name]))
   return(pr)
    
 def vppmsg_to_namedtuple(obj):

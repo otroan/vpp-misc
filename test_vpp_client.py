@@ -43,8 +43,13 @@ def vpp_show_version(stub):
   print('VPP build date =', bytearray(version.build_date).decode().rstrip('\0x00'))
   print('VPP build dir =', bytearray(version.build_directory).decode().rstrip('\0x00'))
 
+def prettify(mac_string):
+  return ':'.join('%02x' % ord(b) for b in mac_string)
+
 def create_loopback(stub):
-  result = stub.create_loopback(vpe_pb2.create_loopback_request(mac_address=bytearray().extend("00:45:36:45:f2:00".replace(':', ''))))
+  mac_address="00:45:36:45:F2:00".replace(':', '').decode('hex')
+  print("Creating loopback with mac:",prettify(mac_address))
+  result = stub.create_loopback(vpe_pb2.create_loopback_request(mac_address=mac_address))
   print('loopback created')
   print(result)
 
