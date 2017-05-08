@@ -43,12 +43,17 @@ def vpp_show_version(stub):
   print('VPP build date =', bytearray(version.build_date).decode().rstrip('\0x00'))
   print('VPP build dir =', bytearray(version.build_directory).decode().rstrip('\0x00'))
 
+def create_loopback(stub):
+  result = stub.create_loopback(vpe_pb2.create_loopback_request(mac_address=bytearray().extend("00:45:36:45:f2:00".replace(':', ''))))
+  print('loopback created')
+  print(result)
+
 def run():
   channel = grpc.insecure_channel('localhost:50051')
   stub = vpe_pb2_grpc.vpeStub(channel)
   print("-------------- show version --------------")
   vpp_show_version(stub)
-
+  create_loopback(stub)
 
 if __name__ == '__main__':
   run()
