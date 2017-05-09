@@ -53,12 +53,18 @@ def create_loopback(stub):
   print('loopback created')
   print(result)
 
+def cli_inband(stub, cmd):
+  result = stub.cli_inband(vpe_pb2.cli_inband_request(cmd = cmd, length=len(cmd)))
+  print(len(result.reply))
+  print(bytearray(result.reply).decode().rstrip('\0x00'))
+
 def run():
   channel = grpc.insecure_channel('localhost:50051')
   stub = vpe_pb2_grpc.vpeStub(channel)
   print("-------------- show version --------------")
   vpp_show_version(stub)
   create_loopback(stub)
+  cli_inband(stub, "show run")
 
 if __name__ == '__main__':
   run()

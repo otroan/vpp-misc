@@ -17,7 +17,7 @@ def grpcmsg_to_namedtuple(obj):
     value = getattr(obj, i.name)
     if not i.name in ["_vl_msg_id", "context", "client_index"]:
       if i.type == 12: #repeated bytes
-        pr[i.name] = bytes(bytearray(value))
+        pr[i.name] = str(bytearray(value))
       else:
         pr[i.name] = value
       #print (' %s: %s = %s' % (i.type, i.name, pr[i.name]))
@@ -28,6 +28,7 @@ def vppmsg_to_namedtuple(obj):
   for name,value in obj.__dict__.iteritems():
     if not name.startswith('_'):
       pr[name] = value
+      #print(name, value, type(value))
   return pr
 
 exec(compile(source=open('vpe.proto.py').read(), filename='vpe.proto.py', mode='exec'))
