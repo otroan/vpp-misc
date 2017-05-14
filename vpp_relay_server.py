@@ -11,13 +11,17 @@ from vpp_papi import VPP
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
-def grpcmsg_to_namedtuple(obj):
+def grpcmsg_to_namedtuple(obj, len_of_dict):
   pr = {}
   for i in obj.DESCRIPTOR.fields:
     value = getattr(obj, i.name)
     if not i.name in ["_vl_msg_id", "context", "client_index"]:
       if i.type == 12: #repeated bytes
         pr[i.name] = str(bytearray(value))
+        # if this is a variable len array, set the len field
+        field_is_var_array = obj.DESCRIPTOR.name + '.' + i.name
+        if field_is_var_array in len_of_dict:
+          pr[len_of_dict[field_is_var_array]] = len(pr[i.name])
       else:
         pr[i.name] = value
       #print (' %s: %s = %s' % (i.type, i.name, pr[i.name]))
@@ -56,7 +60,7 @@ def serve():
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
   vpe_pb2_grpc.add_vpeServicer_to_server(
       vpeServicer(vpp), server)
-  server.add_insecure_port('[::]:50051')
+  server.add_insecure_port('[::]:50052')
   server.start()
   try:
     while True:

@@ -76,9 +76,10 @@ def add_message(name, msgdef, typeonly = False):
 
         args[field_name] = __struct(*f)
 
-        # if len(f) == 4: # Find offset to # elements field
+        if len(f) == 4: # Find offset to # elements field
             # Ensure length/count field is commented out?
-            # args[f[3]] = '// ' + args[f[3]]
+            #args[f[3]] = '// ' + args[f[3]]
+            args[f[3] + '_comment'] = 'len_of:' + field_name
 
         if len(f) >= 3:
             if field_name + '_comment' in args:

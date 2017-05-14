@@ -9,12 +9,14 @@ Usage:
 import sys
 import collections
 
+import re
 from google.protobuf.compiler import plugin_pb2 as plugin
 import itertools
 import json
 from google.protobuf.descriptor_pb2 import DescriptorProto, EnumDescriptorProto, EnumValueDescriptorProto, FieldDescriptorProto, ServiceDescriptorProto, MethodDescriptorProto
 
 def simplify_name(name):
+    "Remove all the namespace information to make short names for Sphinx"
     return name.split(".")[-1]
 
 def convert_protodef_to_editable(proto):
@@ -67,12 +69,30 @@ def traverse(proto_file):
             item = convert_protodef_to_editable(item)
             if item_index in tree:
                 comments = tree[item_index]
-                if item.kind is ServiceDescriptorProto:
+                if "leading_comments" in comments or "trailing_comments" in comments:
+                    item.comment = _collapse_comments(comments)
+                    del comments["leading_comments"]
+                    del comments["trailing_comments"]
+                if item.kind is EnumDescriptorProto:
+                    if 2 in comments: # value in EnumDescriptorProto
+                        for k in comments[2]:
+                            value_comment = comments[2][k]
+                            if value_comment != {}:
+                                item.value[k].comment = _collapse_comments(value_comment)
+                elif item.kind is DescriptorProto:
+                    if 2 in comments: # field in DescriptorProto
+                        for k in comments[2]:
+                            field_comment = comments[2][k]
+                            if field_comment != {}:
+                                item.field[k].comment = _collapse_comments(field_comment)
+                elif item.kind is ServiceDescriptorProto:
                     if 2 in comments: # method in ServiceDescriptorProto
                         for k in comments[2]:
                             method_comment = comments[2][k]
                             if method_comment != {}:
                                 item.method[k].comment = _collapse_comments(method_comment)
+                else:
+                    raise Exception, item.kind
 
             yield item, package
 
@@ -99,7 +119,7 @@ def traverse(proto_file):
     
     # Only message, services, enums, extensions, options
     #if set(tree.keys()).difference(set([4, 5, 6, 7, 8])) != set():
-    #  raise Exception, tree
+    #    raise Exception, tree
 
     return {"types":
         list(itertools.chain(
@@ -172,33 +192,43 @@ def generate_code(request, response):
     for proto_file in request.proto_file:
         types = []
         messages = {}
+        len_of_dict = {}
 
         results = traverse(proto_file)
         map_types = {}
+        protofile_pb2 = '%s_pb2' % proto_file.name.split("/")[-1].split(".")[0]
+        protofile_grpc = '%s_pb2_grpc' % proto_file.name.split("/")[-1].split(".")[0]
+        import_code_gen = 'import %s\n' % protofile_pb2
+        import_code_gen += 'import %s\n' % protofile_grpc
     
-        def full_name(package, item):
-            return "%s.%s" % (package, item.name)
         for item, package in results["types"]:
-            if item.options.has_key("map_entry"):
-                map_types[full_name(package, item)] = dict([(x.name,x) for x in item.field])
-        for item, package in results["types"]:
+            if item.kind == DescriptorProto:
+                for f in item.field:
+                    field_comment = f.comment
+                    try:
+                        len_of_field = re.search('len_of:(.+)$', f.comment).group(1).rstrip(' ')
+                    except AttributeError:
+                        len_of_field = ''
+                    if len_of_field: 
+                        len_of_dict[item.name + '.'+ len_of_field] = f.name
             if item.kind == ServiceDescriptorProto:
                 if "subscribe" in item.name:
                     continue #skip subscribtion service for now
-                protofile_pb2 = '%s_pb2' % proto_file.name.split("/")[-1].split(".")[0]
-                protofile_grpc = '%s_pb2_grpc' % proto_file.name.split("/")[-1].split(".")[0]
-                code_gen = 'import %s\n' % protofile_pb2
-                code_gen += 'import %s\n' % protofile_grpc
-                code_gen += 'class %sServicer( %s.%sServicer):\n' % (item.name, protofile_grpc,item.name)
-                code_gen += ' def __init__(self, vpp):\n  self.vpp = vpp\n'
+                service_class_code_gen = 'class %sServicer( %s.%sServicer):\n' % (item.name, protofile_grpc,item.name)
+                service_class_code_gen += ' def __init__(self, vpp):\n  self.vpp = vpp\n'
                 for m in item.method:
-                    code_gen += ' def %s (self, request, context):\n' % m.name
-                    code_gen += '  rv = self.vpp.%s(**grpcmsg_to_namedtuple(request))\n' % m.name
-                    code_gen += '  return %s_pb2.%s_reply(**vppmsg_to_namedtuple(rv))\n' % ((proto_file.name.split("/")[-1].split(".")[0] , m.name))
+                    service_class_code_gen += ' def %s (self, request, context):\n' % m.name
+                    service_class_code_gen += '  rv = self.vpp.%s(**grpcmsg_to_namedtuple(request, len_of_dict))\n' % m.name
+                    service_class_code_gen += '  return %s_pb2.%s_reply(**vppmsg_to_namedtuple(rv))\n' % ((proto_file.name.split("/")[-1].split(".")[0] , m.name))
 
         f = response.file.add()
         f.name = proto_file.name + '.py'
-        f.content = code_gen
+        f.content = import_code_gen
+        f.content += 'len_of_dict = {'
+        for k,v in len_of_dict.iteritems():
+            f.content += '\''+k+'\':\''+v+'\','
+        f.content += '}\n'
+        f.content += service_class_code_gen
 
 
 if __name__ == '__main__':
