@@ -46,6 +46,32 @@
             ["i32", "retval"],
             {"crc" : "0x0425b038"}
         ],
+        ["l2fib_flush_bd",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u32", "bd_id"],
+            {"crc" : "0x82b7f182"}
+        ],
+        ["l2fib_flush_bd_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0xa68d5609"}
+        ],
+        ["l2fib_flush_int",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u32", "sw_if_index"],
+            {"crc" : "0xa1216623"}
+        ],
+        ["l2fib_flush_int_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0xaacfc0d0"}
+        ],
         ["l2fib_add_del",
             ["u16", "_vl_msg_id"],
             ["u32", "client_index"],
@@ -80,6 +106,20 @@
             ["i32", "retval"],
             ["u32", "resulting_feature_bitmap"],
             {"crc" : "0xbd749594"}
+        ],
+        ["bridge_domain_set_mac_age",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u32", "bd_id"],
+            ["u8", "mac_age"],
+            {"crc" : "0xf58c37aa"}
+        ],
+        ["bridge_domain_set_mac_age_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0xc127a682"}
         ],
         ["bridge_domain_add_del",
             ["u16", "_vl_msg_id"],
@@ -183,5 +223,5 @@
             {"crc" : "0x2d083312"}
         ]
     ],
-"vl_api_version" :"0x179acab3"
+"vl_api_version" :"0xe1331edd"
 }

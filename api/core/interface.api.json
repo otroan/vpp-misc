@@ -189,7 +189,21 @@
             ["u32", "context"],
             ["i32", "retval"],
             {"crc" : "0x761cbcb0"}
+        ],
+        ["sw_interface_set_mac_address",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u32", "sw_if_index"],
+            ["u8", "mac_address", 6],
+            {"crc" : "0xe4f22660"}
+        ],
+        ["sw_interface_set_mac_address_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0x9dc8a452"}
         ]
     ],
-"vl_api_version" :"0x6857f668"
+"vl_api_version" :"0x8fba8acf"
 }

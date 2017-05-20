@@ -137,12 +137,13 @@ def print_req_response_services():
 
 def print_services():
    print_req_response_services()
-   print_pubsub_services()
+   # print_pubsub_services() : TODO Later
 #
 # Main
 #
 def vppprotogen(command_arguments):
     global module
+    global messages
     parser = argparse.ArgumentParser()
     parser.add_argument('jsonfile')
     parser.add_argument('--services', dest='services', action='store_true',
@@ -150,8 +151,10 @@ def vppprotogen(command_arguments):
     parser.add_argument('--no-services', dest='services', action='store_false',
                         help="Do not produce GRPC services section")
     parser.set_defaults(services=True)
-
+    protoout='build'
+    parser.add_argument('--proto-out', dest='protoout', default='build')
     args = parser.parse_args(command_arguments)
+    messages = {}
     with open(args.jsonfile) as apidef_file:
         api = json.load(apidef_file)
         for t in api['types']:
@@ -159,11 +162,10 @@ def vppprotogen(command_arguments):
 
         for m in api['messages']:
             add_message(m[0], m[1:])
-
     module = args.jsonfile.split('.', 1)[0]
     module = module.split('/')[-1:][0]
     orig_stdout = sys.stdout
-    f = open(module+'.proto', 'w')
+    f = open(protoout+'/'+module+'.proto', 'w')
     sys.stdout = f
     print('// File:', args.jsonfile)
     print('syntax = "proto3";')

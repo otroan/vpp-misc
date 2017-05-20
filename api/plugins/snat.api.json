@@ -321,7 +321,39 @@
             ["u16", "ports_per_host"],
             ["u32", "ses_num"],
             {"crc" : "0x0b0ddd08"}
+        ],
+        ["snat_det_set_timeouts",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u32", "udp"],
+            ["u32", "tcp_established"],
+            ["u32", "tcp_transitory"],
+            ["u32", "icmp"],
+            {"crc" : "0xfe713877"}
+        ],
+        ["snat_det_set_timeouts_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0x194bb7e2"}
+        ],
+        ["snat_det_get_timeouts",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            {"crc" : "0x834fa3bc"}
+        ],
+        ["snat_det_get_timeouts_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            ["u32", "udp"],
+            ["u32", "tcp_established"],
+            ["u32", "tcp_transitory"],
+            ["u32", "icmp"],
+            {"crc" : "0x4d03d12e"}
         ]
     ],
-"vl_api_version" :"0x0e59d5ee"
+"vl_api_version" :"0x08ba2724"
 }

@@ -511,6 +511,18 @@
             ["u32", "bytes"],
             {"crc" : "0x759f7b5d"}
         ],
+        ["one_stats_flush",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            {"crc" : "0x8472634b"}
+        ],
+        ["one_stats_flush_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0xc08bb290"}
+        ],
         ["one_stats_enable_disable",
             ["u16", "_vl_msg_id"],
             ["u32", "client_index"],
@@ -538,5 +550,5 @@
             {"crc" : "0x7f197887"}
         ]
     ],
-"vl_api_version" :"0xee1f9284"
+"vl_api_version" :"0x71f94795"
 }

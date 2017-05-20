@@ -218,17 +218,17 @@ def generate_code(request, response):
                 service_class_code_gen += ' def __init__(self, vpp):\n  self.vpp = vpp\n'
                 for m in item.method:
                     service_class_code_gen += ' def %s (self, request, context):\n' % m.name
-                    service_class_code_gen += '  rv = self.vpp.%s(**grpcmsg_to_namedtuple(request, len_of_dict))\n' % m.name
+                    service_class_code_gen += '  rv = self.vpp.%s(**grpcmsg_to_namedtuple(request, self.len_of_dict))\n' % m.name
                     service_class_code_gen += '  return %s_pb2.%s_reply(**vppmsg_to_namedtuple(rv))\n' % ((proto_file.name.split("/")[-1].split(".")[0] , m.name))
 
         f = response.file.add()
         f.name = proto_file.name + '.py'
         f.content = import_code_gen
-        f.content += 'len_of_dict = {'
+        f.content += service_class_code_gen
+        f.content += ' len_of_dict = {'
         for k,v in len_of_dict.iteritems():
             f.content += '\''+k+'\':\''+v+'\','
         f.content += '}\n'
-        f.content += service_class_code_gen
 
 
 if __name__ == '__main__':

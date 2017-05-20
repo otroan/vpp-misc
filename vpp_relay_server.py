@@ -4,6 +4,8 @@ import fnmatch
 import grpc
 import os
 from google.protobuf import descriptor
+import re
+import sys
 
 import vpe_pb2
 import vpe_pb2_grpc
@@ -35,18 +37,31 @@ def vppmsg_to_namedtuple(obj):
       #print(name, value, type(value))
   return pr
 
-exec(compile(source=open('vpe.proto.py').read(), filename='vpe.proto.py', mode='exec'))
+results = []
+
+for root, dirs, files in os.walk('build'):
+    sys.path.append(root)
+    for _file in files:
+        if fnmatch.fnmatch(_file, '*.proto.py'):
+            results.append(re.sub('.proto.py','',_file))
+            exec(compile(source=open(os.path.join(root, _file)).read(), filename=_file, mode='exec'))
+print(results)
 
 def serve():
   # directory containing all the json api files.
   # if vpp is installed on the system, these will be in /usr/share/vpp/api/
   vpp_json_dir = os.environ['VPP'] + '/build-root/install-vpp_debug-native/vpp/share/vpp/api/core'
-
+  vpp_plugins_json_dir = os.environ['VPP'] + '/build-root/install-vpp_debug-native/vpp/share/vpp/api/plugins'
   # construct a list of all the json api files
+
   jsonfiles = []
   for root, dirnames, filenames in os.walk(vpp_json_dir):
       for filename in fnmatch.filter(filenames, '*.api.json'):
           jsonfiles.append(os.path.join(vpp_json_dir, filename))
+
+  for root, dirnames, filenames in os.walk(vpp_plugins_json_dir):
+      for filename in fnmatch.filter(filenames, '*.api.json'):
+          jsonfiles.append(os.path.join(vpp_plugins_json_dir, filename))
 
   if not jsonfiles:
       print('Error: no json api files found')
@@ -58,8 +73,13 @@ def serve():
   print(r)
 
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-  vpe_pb2_grpc.add_vpeServicer_to_server(
-      vpeServicer(vpp), server)
+  for service_name in results:
+      module_name = service_name + '_pb2_grpc'
+      module = __import__(module_name)
+      add_servicer = 'add_'+service_name+'Servicer_to_server'
+      init_servicer = service_name + 'Servicer'
+      getattr(module, add_servicer) (globals()[init_servicer] (vpp), server)
+                                          
   server.add_insecure_port('[::]:50052')
   server.start()
   try:
