@@ -217,9 +217,17 @@ def generate_code(request, response):
                 service_class_code_gen = 'class %sServicer( %s.%sServicer):\n' % (item.name, protofile_grpc,item.name)
                 service_class_code_gen += ' def __init__(self, vpp):\n  self.vpp = vpp\n'
                 for m in item.method:
-                    service_class_code_gen += ' def %s (self, request, context):\n' % m.name
-                    service_class_code_gen += '  rv = self.vpp.%s(**grpcmsg_to_namedtuple(request, self.len_of_dict))\n' % m.name
-                    service_class_code_gen += '  return %s_pb2.%s_reply(**vppmsg_to_namedtuple(rv))\n' % ((proto_file.name.split("/")[-1].split(".")[0] , m.name))
+                    if "dump" in m.name:
+                        service_class_code_gen += ' def %s (self, request, context):\n' % m.name
+                        service_class_code_gen += '  rv = self.vpp.%s(**grpcmsg_to_namedtuple(request, self.len_of_dict))\n' % m.name
+                        service_class_code_gen += '  for m in rv:\n'
+                        dump_reply = re.sub('dump','details',m.name)
+                        service_class_code_gen += '    yield %s_pb2.%s(**vppmsg_to_namedtuple(m))\n' % (proto_file.name.split("/")[-1].split(".")[0] , dump_reply)
+                        
+                    else:
+                        service_class_code_gen += ' def %s (self, request, context):\n' % m.name
+                        service_class_code_gen += '  rv = self.vpp.%s(**grpcmsg_to_namedtuple(request, self.len_of_dict))\n' % m.name
+                        service_class_code_gen += '  return %s_pb2.%s_reply(**vppmsg_to_namedtuple(rv))\n' % ((proto_file.name.split("/")[-1].split(".")[0] , m.name))
 
         f = response.file.add()
         f.name = proto_file.name + '.py'

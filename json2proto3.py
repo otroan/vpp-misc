@@ -22,7 +22,7 @@ import pprint, argparse
 messages = {}
 
 def __struct (t, n = None, e = -1, vl = None):
-    base_types = { 'u8' : 'bytes',
+    base_types = { 'u8' : 'uint32',
                    'u16' : 'uint32',
                    'u32' : 'uint32',
                    'i32' : 'int32',
@@ -30,10 +30,19 @@ def __struct (t, n = None, e = -1, vl = None):
                    'f64' : 'float',
                    'bool' : 'bool',
                    }
+    repeated_base_types = {
+                   'u8' : 'bytes',
+                   'u16' : 'uint32',
+                   'u32' : 'uint32',
+                   'i32' : 'int32',
+                   'u64' : 'uint64',
+                   'f64' : 'float',
+                   'bool' : 'bool',
+        }
     pack = None
     if t in base_types:
         if e >= 0:
-            return 'repeated ' + base_types[t]
+            return 'repeated ' + repeated_base_types[t]
         else:
             return base_types[t]
 
@@ -70,6 +79,8 @@ def add_message(name, msgdef, typeonly = False):
         if field_name.startswith('is_') and f[0] == "u8":
             args[field_name + '_comment'] = field_type
             field_type = f[0] = 'bool'
+        elif f[0] == "u8":
+            args[field_name + '_comment'] = field_type + " "
         # u16 is unsupported
         elif field_type == 'u16':
             args[field_name + '_comment'] = field_type
