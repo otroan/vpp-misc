@@ -46,6 +46,15 @@ for proto_file in protos:
         (
             '',
             '-I.',
+            '--grpc_out=.',
+            '--plugin=protoc-gen-grpc=/usr/local/bin/grpc_cpp_plugin',
+            proto_file,
+        )
+         )
+    protoc.main(
+        (
+            '',
+            '-I.',
             '--plugin=protoc-gen-custom=../codegen_vpp_grpc_relay.py',
             '--custom_out=.',
             proto_file,
