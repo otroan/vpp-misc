@@ -5,13 +5,25 @@ custom plugin to protoc to autogenerate servicer class definition, relay server,
 
 ## To run this..
 
-1.pip install grpcio grpcio_tools 
-2.python run_codegen.py
-3.Start vpp
-4.Start gRPC relay server: python vpp_relay_server.py
-5.Run test grpc vpp client: python test_vpp_client.py
+- pip install grpcio grpcio_tools
+- python run_codegen.py
+- Start vpp
+- Start gRPC relay server: python vpp_relay_server.py
+- Run test grpc vpp client: python test_vpp_client.py
 
+### If you want to generate other language bindings..
 
+Install grpc that brings in the language specific plugins:
+```sh
+- git clone https://github.com/grpc/grpc.git
+- git submodule update --init
+- sudo apt-get install pkg-config
+- make
+- sudo make install
+- cd grpc/third_party/protobuf
+- make
+- sudo make install
+```
 
 Setting up python virtual env with vpp:
 From : https://wiki.fd.io/view/VPP/Python_API
