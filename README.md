@@ -26,6 +26,14 @@ Install grpc that brings in the language specific plugins:
 ```
 Modify run_codegen.py to create additional language bindings using the protoc plugin for the desired language.
 
+#### Go bindings
+```sh
+sudo apt install golang-go
+go get -u github.com/golang/protobuf/{proto,protoc-gen-go}
+go get -u google.golang.org/grpc
+
+```
+
 ***
 
 ## Setting up python virtual env with vpp:

@@ -180,6 +180,7 @@ def vppprotogen(command_arguments):
     sys.stdout = f
     print('// File:', args.jsonfile)
     print('syntax = "proto3";')
+    print('option go_package ="vpp_go_'+module+'";')
     #
     # Generate messages
     #
