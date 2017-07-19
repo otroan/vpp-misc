@@ -6,6 +6,7 @@ import os
 from google.protobuf import descriptor
 import re
 import sys
+sys.path.append('./build')
 
 import vpe_pb2
 import vpe_pb2_grpc

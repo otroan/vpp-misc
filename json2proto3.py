@@ -17,9 +17,14 @@
 from __future__ import print_function
 import sys, os, logging, collections, struct, json, glob
 import pprint, argparse
-
+import re
 # Globals
 messages = {}
+unknown_messages = []
+notification_messages = []
+
+exceptions = {'l2_fib_table_dump' : 'l2_fib_table_entry',
+              'cli_request' : 'cli_reply'}
 
 def __struct (t, n = None, e = -1, vl = None):
     base_types = { 'u8' : 'uint32',
@@ -105,8 +110,36 @@ def add_message(name, msgdef, typeonly = False):
 
 def add_type(name, typedef):
     return add_message('vl_api_' + name + '_t', typedef, typeonly=True)
+def add_notification_response():
+    print('message ', module + '_vpp_notification_ack', '{')
+    print(' ','bool ack = 1;')
+    print('}')
+    
+def print_notification_services():
+    global unknown_messages, notification_messages
+    if (len(unknown_messages) == 0 and len(notification_messages) == 0):
+        return
+    print('service', module + '_notifications', '{')
+    for name in notification_messages:
+        request = name
+        reply = module + '_vpp_notification_ack'
+        print('  rpc ' + name + '_notification (' + request + ') returns (' + reply + ');')
+    for name in unknown_messages:
+        if name in notification_messages:
+            continue
+        request = name
+        reply = module + '_vpp_notification_ack'
+        print('  rpc ' + name + '_notification (' + request + ') returns (' + reply + ');')
+    print('}')
 
 def print_pubsub_services():
+    global notification_messages
+    subscription_services = 0
+    for name, msgdef in messages.iteritems():
+        if name.startswith('want_'):
+            subscription_services += 1
+    if subscription_services == 0:
+        return
     print('service', module + '_subscribe', '{')
     for name, msgdef in messages.iteritems():
         if messages[name]['typeonly']:
@@ -117,14 +150,22 @@ def print_pubsub_services():
             reply = name + '_reply'
         else:
             continue
+        notification_msg = str.replace(name.encode('ascii','replace'), "want_", "")
+        notification_msg = re.sub('s$','', notification_msg)
+        if notification_msg in messages:
+            notification_messages.append(notification_msg)
+            print('  //WARNING now notification_messages is ' + notification_msg)
+        else:
+            print('  //WARNING now notification_msg not found ' + notification_msg)
         request = name + '_request'
         if not reply in messages:
-            print('// WARNING Cannot find reply matching request ' + request + ' ' + reply)
+            print('  // WARNING Cannot find reply matching request ' + request + ' ' + reply)
             continue
         print('  rpc ' + name + ' (' + request + ') returns (' +  reply + ');')
     print('}')
 
 def print_req_response_services():
+    global unknown_messages
     print('service', module, '{')
     for name, msgdef in messages.iteritems():
         if messages[name]['typeonly']:
@@ -133,28 +174,36 @@ def print_req_response_services():
             continue
         if name.endswith('_reply') or name.endswith('_details'):
             continue
-        if name.endswith('_dump'):
-            reply = name.rstrip('_dump') + '_details'
+        if name in exceptions:
+            reply = exceptions[name]
+            if name.endswith('_dump'):
+                stream = 'stream '
+        elif name.endswith('_dump'):
+            reply = name.replace('_dump','') + '_details'
             stream = 'stream '
         else:
             reply = name + '_reply'
             stream = ''
         request = name + '_request'
         if not reply in messages:
-            print('// WARNING Cannot find reply matching request ' + request + ' ' + reply)
+            print('  // WARNING Cannot find reply matching request ' + request + ' ' + reply)
+            unknown_messages.append(name)
             continue
         print('  rpc ' + name + ' (' + request + ') returns (' + stream + reply + ');')
     print('}')
 
 def print_services():
    print_req_response_services()
-   # print_pubsub_services() : TODO Later
+   print_pubsub_services()
+   print_notification_services()
 #
 # Main
 #
 def vppprotogen(command_arguments):
     global module
-    global messages
+    global messages, unknown_messages, notification_messages
+    unknown_messages = []
+    notification_messages = []
     parser = argparse.ArgumentParser()
     parser.add_argument('jsonfile')
     parser.add_argument('--services', dest='services', action='store_true',
@@ -187,7 +236,12 @@ def vppprotogen(command_arguments):
     for name, msgdef in messages.iteritems():
         count = 1
         if not name.endswith('_reply') and not name.endswith('_details') and not messages[name]['typeonly']:
-            name_req = name + '_request'
+            if ((name + '_reply') in messages or name.endswith('_dump')):
+                name_req = name + '_request'
+            elif name in exceptions and exceptions[name] in messages:
+                name_req = name + '_request'
+            else:
+                name_req = name
         else:
             name_req = name
         if messages[name]['typeonly']:
@@ -206,14 +260,16 @@ def vppprotogen(command_arguments):
             print (' ', v, k, '=', str(count) + ';' + comment)
             count += 1
         print('}')
-
+    add_notification_response()
     #
     # Generate services
     #
     if args.services:
         print_services()
     sys.stdout = orig_stdout
-    f.close()
+    f.close()    
 
 if __name__ == '__main__':
     sys.exit(vppprotogen(sys.argv[1:]))
+
+

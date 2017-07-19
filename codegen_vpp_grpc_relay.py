@@ -212,7 +212,7 @@ def generate_code(request, response):
                     if len_of_field: 
                         len_of_dict[item.name + '.'+ len_of_field] = f.name
             if item.kind == ServiceDescriptorProto:
-                if "subscribe" in item.name:
+                if "subscribe" in item.name or "notifications" in item.name:
                     continue #skip subscribtion service for now
                 service_class_code_gen = 'class %sServicer( %s.%sServicer):\n' % (item.name, protofile_grpc,item.name)
                 service_class_code_gen += ' def __init__(self, vpp):\n  self.vpp = vpp\n'

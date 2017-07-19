@@ -4,6 +4,10 @@ from __future__ import print_function
 
 import grpc
 
+import sys
+sys.path.append('./build')
+print(sys.path)
+
 import vpe_pb2
 import vpe_pb2_grpc
 import interface_pb2

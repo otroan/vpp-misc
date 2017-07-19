@@ -61,9 +61,9 @@ pushd $VPP/src/vpp-api/python/
 $VPP/virtualenv/bin/python setup.py install
 popd
 ```
-### Now set the LD_LIBRARY_PATH such that it points to the directory containing libpneum.so
+### Now set the LD_LIBRARY_PATH such that it points to the directory containing libvppapiclient.so (earlier libpneum.so)
 ```
-export LD_LIBRARY_PATH=`find $VPP -name "libpneum.so" -exec dirname {} \; | head -n 1`
+export LD_LIBRARY_PATH=`find $VPP -name "libvppapiclient.so" -exec dirname {} \; | head -n 1`
 ``` 
 ### You will now need two windows :
 One for vpp, and the other for python
