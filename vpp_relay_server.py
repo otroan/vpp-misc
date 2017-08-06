@@ -6,16 +6,17 @@ import os
 from google.protobuf import descriptor
 import re
 import sys
+import types
 sys.path.append('./build')
 
-import vpe_pb2
-import vpe_pb2_grpc
 from vpp_papi import VPP
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
-def grpcmsg_to_namedtuple(obj, len_of_dict):
+def grpcmsg_to_namedtuple(obj, len_of_dict, subscribe=False):
   pr = {}
+  if subscribe:
+      pr["pid"] = os.getpid()
   for i in obj.DESCRIPTOR.fields:
     value = getattr(obj, i.name)
     if not i.name in ["_vl_msg_id", "context", "client_index"]:
@@ -80,6 +81,19 @@ def serve():
       add_servicer = 'add_'+service_name+'Servicer_to_server'
       init_servicer = service_name + 'Servicer'
       getattr(module, add_servicer) (globals()[init_servicer] (vpp), server)
+      subscriber_servicer = service_name + '_subscribeServicer'
+      subscribe_defined = False
+      try:
+        if getattr(module,subscriber_servicer):
+            #print(" %s found %s" % (subscriber_servicer, module_name))
+            subscribe_defined = True
+      except AttributeError:
+          print( "%s not found" % subscriber_servicer)
+          pass
+      if subscribe_defined:
+            add_servicer = 'add_' + service_name + '_subscribeServicer_to_server'
+            getattr(module, add_servicer)(globals()[subscriber_servicer](vpp), server)
+
                                           
   server.add_insecure_port('[::]:50052')
   server.start()
