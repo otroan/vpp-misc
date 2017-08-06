@@ -184,6 +184,52 @@ def type_to_string(f, map_types):
     else:
         raise Exception, f.type
 
+def generate_request_response_service_class (item, package, proto_file, protofile_grpc):
+    service_class_code_gen = 'class %sServicer( %s.%sServicer):\n' % (item.name, protofile_grpc, item.name)
+    service_class_code_gen += ' def __init__(self, vpp):\n  self.vpp = vpp\n'
+    for m in item.method:
+        if "dump" in m.name:
+            service_class_code_gen += ' def %s (self, request, context):\n' % m.name
+            service_class_code_gen += '  rv = self.vpp.%s(**grpcmsg_to_namedtuple(request, self.len_of_dict))\n' % m.name
+            service_class_code_gen += '  for m in rv:\n'
+            dump_reply = re.sub('dump', 'details', m.name)
+            service_class_code_gen += '    yield %s_pb2.%s(**vppmsg_to_namedtuple(m))\n' % (
+            proto_file.name.split("/")[-1].split(".")[0], dump_reply)
+
+        else:
+            service_class_code_gen += ' def %s (self, request, context):\n' % m.name
+            service_class_code_gen += '  rv = self.vpp.%s(**grpcmsg_to_namedtuple(request, self.len_of_dict))\n' % m.name
+            service_class_code_gen += '  return %s_pb2.%s_reply(**vppmsg_to_namedtuple(rv))\n' % (
+            (proto_file.name.split("/")[-1].split(".")[0], m.name))
+    return(service_class_code_gen)
+
+def generate_subscriber_service_class (item, package, proto_file, protofile_grpc):
+    service_class_code_gen = '\nclass %sServicer( %s.%sServicer):\n' % (item.name, protofile_grpc, item.name)
+    service_class_code_gen += ' def __init__(self, vpp):\n'
+    service_class_code_gen += '  self.vpp = vpp\n'
+    #service_class_code_gen += '  self.subscription_db = defaultdict(list)\n'
+    service_class_code_gen += '  self.subscription_db =[]\n'
+    service_class_code_gen += ' def publish_events(self, msgname, result):\n'
+    service_class_code_gen += "  notification_event = getattr(%s_pb2,msgname)(**vppmsg_to_namedtuple(result))\n" % \
+                              ((proto_file.name.split("/")[-1].split(".")[0]))
+    service_class_code_gen += '  for client_stub in self.subscription_db[msgname]:\n'
+    # TODO: refine this, if a client subscribes to one event it receives all notifications for the class
+    service_class_code_gen += '   getattr(client_stub, msgname % \"_notification\")(notification_event)\n'
+    for m in item.method:
+        service_class_code_gen += ' def %s (self, request, context):\n' % m.name
+        service_class_code_gen += '  channel = grpc.insecure_channel(context.peer())\n'
+        service_class_code_gen += '  stub = %s_pb2_grpc.%s_notificationsStub(channel)\n' % \
+                                  ((proto_file.name.split("/")[-1].split(".")[0]),
+                                   (proto_file.name.split("/")[-1].split(".")[0]))
+        #TODO: append to the notification requested not to the entire class
+        #self.subscription_db["notification_name"].append(stub)'
+        service_class_code_gen += '  self.subscription_db.append(stub)\n'
+        service_class_code_gen += '  rv = self.vpp.%s(**grpcmsg_to_namedtuple(request, self.len_of_dict, subscribe=True))\n'\
+                                  % m.name
+        service_class_code_gen += '  return %s_pb2.%s_reply(**vppmsg_to_namedtuple(rv))\n' % (
+        (proto_file.name.split("/")[-1].split(".")[0], m.name))
+    return(service_class_code_gen)
+
 def generate_code(request, response):
     """
     Core function. Starts from a CodeGeneratorRequest and adds files to
@@ -196,11 +242,13 @@ def generate_code(request, response):
 
         results = traverse(proto_file)
         map_types = {}
+
         protofile_pb2 = '%s_pb2' % proto_file.name.split("/")[-1].split(".")[0]
         protofile_grpc = '%s_pb2_grpc' % proto_file.name.split("/")[-1].split(".")[0]
         import_code_gen = 'import %s\n' % protofile_pb2
         import_code_gen += 'import %s\n' % protofile_grpc
-    
+        import_code_gen += 'from collections import defaultdict\n'
+        subscriber_class_code_gen = ""
         for item, package in results["types"]:
             if item.kind == DescriptorProto:
                 for f in item.field:
@@ -212,23 +260,14 @@ def generate_code(request, response):
                     if len_of_field: 
                         len_of_dict[item.name + '.'+ len_of_field] = f.name
             if item.kind == ServiceDescriptorProto:
-                if "subscribe" in item.name or "notifications" in item.name:
+                if "notifications" in item.name:
                     continue #skip subscribtion service for now
-                service_class_code_gen = 'class %sServicer( %s.%sServicer):\n' % (item.name, protofile_grpc,item.name)
-                service_class_code_gen += ' def __init__(self, vpp):\n  self.vpp = vpp\n'
-                for m in item.method:
-                    if "dump" in m.name:
-                        service_class_code_gen += ' def %s (self, request, context):\n' % m.name
-                        service_class_code_gen += '  rv = self.vpp.%s(**grpcmsg_to_namedtuple(request, self.len_of_dict))\n' % m.name
-                        service_class_code_gen += '  for m in rv:\n'
-                        dump_reply = re.sub('dump','details',m.name)
-                        service_class_code_gen += '    yield %s_pb2.%s(**vppmsg_to_namedtuple(m))\n' % (proto_file.name.split("/")[-1].split(".")[0] , dump_reply)
-                        
-                    else:
-                        service_class_code_gen += ' def %s (self, request, context):\n' % m.name
-                        service_class_code_gen += '  rv = self.vpp.%s(**grpcmsg_to_namedtuple(request, self.len_of_dict))\n' % m.name
-                        service_class_code_gen += '  return %s_pb2.%s_reply(**vppmsg_to_namedtuple(rv))\n' % ((proto_file.name.split("/")[-1].split(".")[0] , m.name))
-
+                elif "subscribe" in item.name:
+                    subscriber_class_code_gen = generate_subscriber_service_class (item, package,
+                                                                                  proto_file, protofile_grpc)
+                else:
+                    service_class_code_gen = generate_request_response_service_class (item, package,
+                                                                                  proto_file, protofile_grpc)
         f = response.file.add()
         f.name = proto_file.name + '.py'
         f.content = import_code_gen
@@ -237,6 +276,13 @@ def generate_code(request, response):
         for k,v in len_of_dict.iteritems():
             f.content += '\''+k+'\':\''+v+'\','
         f.content += '}\n'
+        if len(subscriber_class_code_gen):
+            f.content += subscriber_class_code_gen
+            f.content += ' len_of_dict = {'
+            for k, v in len_of_dict.iteritems():
+                f.content += '\'' + k + '\':\'' + v + '\','
+            f.content += '}\n'
+
 
 
 if __name__ == '__main__':
