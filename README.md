@@ -9,7 +9,9 @@ custom plugin to protoc to autogenerate servicer class definition, relay server,
 - python run_codegen.py
 - Start vpp
 - Start gRPC relay server  vpp_relay_server.py: after setting up vpp follow [Setting up python virtual env with vpp]
-- Run test grpc vpp client: python test_vpp_client.py
+- Run test grpc vpp client: python test_vpp_client.py 
+OR from a remote node connecting to vpp:
+- Run test grpc vpp client: python test_vpp_client.py -s <vpp-host-name> [-p <server-port> -l <local-port>]
 
 ### If you want to generate other language bindings..
 
