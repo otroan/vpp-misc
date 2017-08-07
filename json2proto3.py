@@ -89,6 +89,9 @@ def add_message(name, msgdef, typeonly = False):
         # u16 is unsupported
         elif field_type == 'u16':
             args[field_name + '_comment'] = field_type
+        elif field_name == 'pid' and field_type == 'u32':
+            args['grpc_target'] = 'string'
+
 
         args[field_name] = __struct(*f)
 

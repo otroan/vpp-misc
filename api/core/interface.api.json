@@ -138,15 +138,6 @@
             ["u32", "vrf_id"],
             {"crc" : "0xab44111d"}
         ],
-        ["vnet_interface_counters",
-            ["u16", "_vl_msg_id"],
-            ["u8", "vnet_counter_type"],
-            ["u8", "is_combined"],
-            ["u32", "first_sw_if_index"],
-            ["u32", "count"],
-            ["u8", "data", 0, "count"],
-            {"crc" : "0x312082b4"}
-        ],
         ["sw_interface_set_unnumbered",
             ["u16", "_vl_msg_id"],
             ["u32", "client_index"],

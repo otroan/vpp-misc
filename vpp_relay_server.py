@@ -19,7 +19,7 @@ def grpcmsg_to_namedtuple(obj, len_of_dict, subscribe=False):
       pr["pid"] = os.getpid()
   for i in obj.DESCRIPTOR.fields:
     value = getattr(obj, i.name)
-    if not i.name in ["_vl_msg_id", "context", "client_index"]:
+    if not i.name in ["_vl_msg_id", "context", "client_index","grpc_target"]:
       if i.type == 12: #repeated bytes
         pr[i.name] = str(bytearray(value))
         # if this is a variable len array, set the len field
@@ -48,6 +48,10 @@ for root, dirs, files in os.walk('build'):
             results.append(re.sub('.proto.py','',_file))
             exec(compile(source=open(os.path.join(root, _file)).read(), filename=_file, mode='exec'))
 print(results)
+
+
+def publish_events(msgname, result):
+    print('received event %s' % msgname)
 
 def serve():
   # directory containing all the json api files.
@@ -88,12 +92,12 @@ def serve():
             #print(" %s found %s" % (subscriber_servicer, module_name))
             subscribe_defined = True
       except AttributeError:
-          print( "%s not found" % subscriber_servicer)
+          #print( "%s not found" % subscriber_servicer)
           pass
       if subscribe_defined:
             add_servicer = 'add_' + service_name + '_subscribeServicer_to_server'
             getattr(module, add_servicer)(globals()[subscriber_servicer](vpp), server)
-
+  #vpp.register_event_callback(publish_events)
                                           
   server.add_insecure_port('[::]:50052')
   server.start()

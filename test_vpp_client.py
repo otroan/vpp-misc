@@ -2,9 +2,10 @@
 
 from __future__ import print_function
 from concurrent import futures
+from argparse import ArgumentParser
 
 import grpc
-
+import socket
 import sys
 sys.path.append('./build')
 print(sys.path)
@@ -16,6 +17,9 @@ import interface_pb2_grpc
 from  prettytable import PrettyTable
 import time
 
+test_server = "localhost"
+test_server_port = "50052"
+test_local_port = "50053"
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 def vpp_show_version(stub):
@@ -47,65 +51,51 @@ def show_interface(stub):
   print(table)
   
 def run():
-  channel = grpc.insecure_channel('pumbba.cisco.com:50052')
+  channel = grpc.insecure_channel(test_server + ':'+test_server_port)
   stub = vpe_pb2_grpc.vpeStub(channel)
   vpp_show_version(stub)
   create_loopback(stub)
   cli_inband(stub, "show run")
   interface_stub = interface_pb2_grpc.interfaceStub(channel)
   show_interface(interface_stub)
+
+  # Subscribe to interface stats
+
   subscriber_stub = vpe_pb2_grpc.vpe_subscribeStub(channel)
-  subscriber_stub.want_stats(vpe_pb2.want_stats_request(enable_disable=1))
+  s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  s.connect((test_server, int(test_server_port)))
+  grpc_target = s.getsockname()[0] + ':' + test_local_port
+  s.close()
+  print(grpc_target)
+  s
+  subscriber_stub.want_stats(vpe_pb2.want_stats_request(enable_disable=1,
+                                                        grpc_target=grpc_target))
 
-class vppClientNotificationServicer(vpe_pb2_grpc.vpe_notificationsServicer):
-  def ip4_arp_event_notification(self, request, context):
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def oam_event_notification(self, request, context):
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def ip6_nd_event_notification(self, request, context):
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def vnet_ip4_fib_counters_notification(self, request, context):
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def vnet_ip6_nbr_counters_notification(self, request, context):
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def is_address_reachable_notification(self, request, context):
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def vnet_ip6_fib_counters_notification(self, request, context):
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def vnet_ip4_nbr_counters_notification(self, request, context):
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def vnet_get_summary_stats_notification(self, request, context):
+class vpeNotificationServicer(vpe_pb2_grpc.vpe_notificationsServicer):
+  def vnet_interface_counters_notification(self, request, context):
     print(request)
+    return vpe_pb2.vpe_vpp_notification_ack(ack=1)
   
 if __name__ == '__main__':
+  parser = ArgumentParser()
+  parser.add_argument("-s", "--server", help="vpp relay server address",
+                        )
+  parser.add_argument("-p", "--port", help="vpp relay server port",
+                        )
+  parser.add_argument("-l", "--local_port", help="local port to receive notifications over grpc",
+                        )
+  args = parser.parse_args()
+  if args.server:
+    test_server = args.server
+  if args.port:
+    test_server_port = args.port
+  if args.local_port:
+    test_local_port = args.local_port
+
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
   vpe_pb2_grpc.add_vpe_notificationsServicer_to_server(
-    vppClientNotificationServicer(), server)
-  server.add_insecure_port('[::]:50052')
+    vpeNotificationServicer(), server)
+  server.add_insecure_port('[::]:'+test_local_port)
   server.start()
   run()
   try:
