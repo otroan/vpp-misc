@@ -13,6 +13,10 @@ from vpp_papi import VPP
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
+notifactions_db = {}
+def relay_server_register_event_callback(msg_name, obj, callback):
+    notifactions_db[msg_name] = [obj,callback]
+
 def grpcmsg_to_namedtuple(obj, len_of_dict, subscribe=False):
   pr = {}
   if subscribe:
@@ -51,7 +55,10 @@ print(results)
 
 
 def publish_events(msgname, result):
-    print('received event %s' % msgname)
+    print('VPP relay server received event %s from VPP' % msgname)
+    if msgname in notifactions_db:
+        getattr(notifactions_db[msgname][0],notifactions_db[msgname][1])(msgname, result)
+
 
 def serve():
   # directory containing all the json api files.
@@ -97,7 +104,8 @@ def serve():
       if subscribe_defined:
             add_servicer = 'add_' + service_name + '_subscribeServicer_to_server'
             getattr(module, add_servicer)(globals()[subscriber_servicer](vpp), server)
-  #vpp.register_event_callback(publish_events)
+  vpp.register_event_callback(publish_events)
+  print(notifactions_db)
                                           
   server.add_insecure_port('[::]:50052')
   server.start()

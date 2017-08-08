@@ -207,17 +207,32 @@ def generate_subscriber_service_class (item, package, proto_file, protofile_grpc
     service_class_code_gen = '\nclass %sServicer( %s.%sServicer):\n' % (item.name, protofile_grpc, item.name)
     service_class_code_gen += ' def __init__(self, vpp):\n'
     service_class_code_gen += '  self.vpp = vpp\n'
-    service_class_code_gen += '  self.vpp.register_event_callback(self.publish_events)\n'
+    corresponding_notification_class = '%s_pb2_grpc.%s_notificationsServicer' % ((proto_file.name.split("/")[-1].split(".")[0]),
+                               (proto_file.name.split("/")[-1].split(".")[0]))
+    service_class_code_gen += '  try:\n'
+    service_class_code_gen += '   method_list = [func for func in dir(%s) if callable(getattr(%s, func))' \
+                              ' and not func.startswith("__")]\n' % (corresponding_notification_class,
+                                                                     corresponding_notification_class)
+    service_class_code_gen += '   for method in method_list:\n'
+    service_class_code_gen += '    relay_server_register_event_callback(method.replace("_notification",""),' \
+                              'self, \"publish_events\")\n'
+    service_class_code_gen += '  except AttributeError:\n'
+    service_class_code_gen += '    print \"%s does not exist\"\n' % corresponding_notification_class
+    service_class_code_gen += '    pass\n'
     #service_class_code_gen += '  self.subscription_db = defaultdict(list)\n'
     service_class_code_gen += '  self.subscription_db =[]\n'
     service_class_code_gen += ' def publish_events(self, msgname, result):\n'
-    service_class_code_gen += '  print(\'received event %s\' % msgname)\n'
+    service_class_code_gen += '  print(\'Publishing event %s\' % msgname)\n'
     service_class_code_gen += "  notification_event = getattr(%s_pb2,msgname)(**vppmsg_to_namedtuple(result))\n" % \
                               ((proto_file.name.split("/")[-1].split(".")[0]))
     #service_class_code_gen += '  for client_stub in self.subscription_db[msgname]:\n'
     # TODO: refine this, if a client subscribes to one event it receives all notifications for the class
-    service_class_code_gen += '  for client_stub in self.subscription_db:\n'
-    service_class_code_gen += '   getattr(client_stub, msgname + \'_notification\')(notification_event)\n'
+    service_class_code_gen += '  for client_stub in self.subscription_db[:]:\n'
+    service_class_code_gen += '    try:\n'
+    service_class_code_gen += '     getattr(client_stub, msgname + \'_notification\')(notification_event)\n'
+    service_class_code_gen += '    except:\n'
+    service_class_code_gen += '      print(client_stub,\" has vanished\")\n'
+    service_class_code_gen += '      self.subscription_db.remove(client_stub)\n'
     for m in item.method:
         service_class_code_gen += ' def %s (self, request, context):\n' % m.name
         # context.peer() gives the channel client/peer has for request response. But the
