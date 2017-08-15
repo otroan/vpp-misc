@@ -20,13 +20,22 @@ import pprint, argparse
 import re
 # Globals
 messages = {}
-unknown_messages = []
-notification_messages = []
+unknown_messages = set()
+notification_messages = set()
+subscribe_messages = set()
 
 exceptions = {'cli_request' : 'cli_reply'}
 
 notification_exception = {'want_bfd_events':['bfd_udp_session_details'],
-                          'want_interface_events':['']}
+                          'want_stats':['vnet_interface_simple_counters',
+                                                   'vnet_ip4_nbr_counters',
+                                                   'vnet_ip6_fib_counters',
+                                                   'vnet_ip6_nbr_counters',
+                                                   'vnet_ip4_fib_counters',
+                                                   'vnet_interface_combined_counters'],
+                          'want_interface_events':['sw_interface_event'],
+                          'dhcp_client_config':['dhcp_compl_event']
+                          }
 
 
 def __struct (t, n = None, e = -1, vl = None):
@@ -68,6 +77,7 @@ def __struct (t, n = None, e = -1, vl = None):
 
 
 def add_message(name, msgdef, typeonly = False):
+    global subscribe_messages
     if name in messages:
         raise ValueError('Duplicate message name: ' + name)
 
@@ -94,6 +104,8 @@ def add_message(name, msgdef, typeonly = False):
             args[field_name + '_comment'] = field_type
         elif field_name == 'pid' and field_type == 'u32':
             args['grpc_target'] = 'string'
+            if not name.startswith('want_'):
+                subscribe_messages.add(name)
 
 
         args[field_name] = __struct(*f)
@@ -142,7 +154,7 @@ def print_pubsub_services():
     global notification_messages
     subscription_services = 0
     for name, msgdef in messages.iteritems():
-        if name.startswith('want_'):
+        if name.startswith('want_') or (name in subscribe_messages):
             subscription_services += 1
     if subscription_services == 0:
         return
@@ -152,17 +164,21 @@ def print_pubsub_services():
             continue
         if name.endswith('_reply') or name.endswith('_details'):
             continue
-        if name.startswith('want_'):
+        if name.startswith('want_') or (name in subscribe_messages):
             reply = name + '_reply'
         else:
             continue
         notification_msg = str.replace(name.encode('ascii','replace'), "want_", "")
         notification_msg = re.sub('s$','', notification_msg)
-        if notification_msg in messages:
-            notification_messages.append(notification_msg)
-            print('  //INFO now notification_messages is ' + notification_msg)
+        if name in notification_exception:
+            for notification in notification_exception[name]:
+                notification_messages.add(notification)
+                print('  //INFO notification_message is ' + notification)
+        elif notification_msg in messages:
+            notification_messages.add(notification_msg)
+            print('  //INFO notification_message is ' + notification_msg)
         else:
-            print('  //WARNING now notification_msg not found ' + notification_msg)
+            print('  //WARNING notification_msg not found ' + notification_msg)
         request = name + '_request'
         if not reply in messages:
             print('  // WARNING Cannot find reply matching request ' + request + ' ' + reply)
@@ -192,8 +208,8 @@ def print_req_response_services():
             stream = ''
         request = name + '_request'
         if not reply in messages:
-            print('  // WARNING Cannot find reply matching request ' + request + ' ' + reply)
-            unknown_messages.append(name)
+            print('  // INFO Cannot find reply matching request ' + request + ' ' + reply)
+            unknown_messages.add(name)
             continue
         print('  rpc ' + name + ' (' + request + ') returns (' + stream + reply + ');')
     print('}')
@@ -207,9 +223,10 @@ def print_services():
 #
 def vppprotogen(command_arguments):
     global module
-    global messages, unknown_messages, notification_messages
-    unknown_messages = []
-    notification_messages = []
+    global messages, unknown_messages, notification_messages,subscribe_messages
+    unknown_messages = set()
+    notification_messages = set()
+    subscribe_messages = set()
     parser = argparse.ArgumentParser()
     parser.add_argument('jsonfile')
     parser.add_argument('--services', dest='services', action='store_true',
