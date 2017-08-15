@@ -14,7 +14,18 @@
             ["u8", "reid_prefix_len"],
             ["u8", "leid", 16],
             ["u8", "reid", 16],
-            {"crc" : "0x3220bf07"}
+            ["u32", "vni"],
+            ["u8", "action"],
+            {"crc" : "0x352e9971"}
+        ],
+        ["gpe_native_fwd_rpath",
+            ["u32", "context"],
+            ["i32", "retval"],
+            ["u32", "fib_index"],
+            ["u32", "nh_sw_if_index"],
+            ["u8", "is_ip4"],
+            ["u8", "nh_addr", 16],
+            {"crc" : "0xf4143401"}
         ]
     ],
     "messages" : [
@@ -37,9 +48,10 @@
         ],
         ["gpe_add_del_fwd_entry_reply",
             ["u16", "_vl_msg_id"],
-            ["u32", "context"],
             ["i32", "retval"],
-            {"crc" : "0xd15edd0e"}
+            ["u32", "context"],
+            ["u32", "fwd_entry_index"],
+            {"crc" : "0xa8d7fb73"}
         ],
         ["gpe_enable_disable",
             ["u16", "_vl_msg_id"],
@@ -69,6 +81,20 @@
             ["u32", "context"],
             ["i32", "retval"],
             {"crc" : "0x92a5cddb"}
+        ],
+        ["gpe_fwd_entry_vnis_get",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            {"crc" : "0xddc3a779"}
+        ],
+        ["gpe_fwd_entry_vnis_get_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            ["u32", "count"],
+            ["u32", "vnis", 0, "count"],
+            {"crc" : "0xba9d59e6"}
         ],
         ["gpe_fwd_entries_get",
             ["u16", "_vl_msg_id"],
@@ -125,7 +151,39 @@
             ["i32", "retval"],
             ["u8", "encap_mode"],
             {"crc" : "0x90637a31"}
+        ],
+        ["gpe_add_del_native_fwd_rpath",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u8", "is_add"],
+            ["u32", "table_id"],
+            ["u32", "nh_sw_if_index"],
+            ["u8", "is_ip4"],
+            ["u8", "nh_addr", 16],
+            {"crc" : "0xda1517fb"}
+        ],
+        ["gpe_add_del_native_fwd_rpath_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0x403f1258"}
+        ],
+        ["gpe_native_fwd_rpaths_get",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u8", "is_ip4"],
+            {"crc" : "0x2eeecb39"}
+        ],
+        ["gpe_native_fwd_rpaths_get_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            ["u32", "count"],
+            ["vl_api_gpe_native_fwd_rpath_t", "entries", 0, "count"],
+            {"crc" : "0xcb9f7e1c"}
         ]
     ],
-"vl_api_version" :"0x6a35ee0a"
+"vl_api_version" :"0xe9ff7cc0"
 }

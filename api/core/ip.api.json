@@ -2,17 +2,33 @@
     "types" : [
         ["fib_path",
             ["u32", "sw_if_index"],
-            ["u32", "weight"],
+            ["u8", "weight"],
+            ["u8", "preference"],
             ["u8", "is_local"],
             ["u8", "is_drop"],
             ["u8", "is_unreach"],
             ["u8", "is_prohibit"],
             ["u8", "afi"],
             ["u8", "next_hop", 16],
-            {"crc" : "0x315b1889"}
+            {"crc" : "0x39f4808f"}
         ]
     ],
     "messages" : [
+        ["ip_table_add_del",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u32", "table_id"],
+            ["u8", "is_ipv6"],
+            ["u8", "is_add"],
+            {"crc" : "0xff1fffe6"}
+        ],
+        ["ip_table_add_del_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0x7da725be"}
+        ],
         ["ip_fib_dump",
             ["u16", "_vl_msg_id"],
             ["u32", "client_index"],
@@ -228,13 +244,14 @@
             ["u8", "is_resolve_attached"],
             ["u8", "not_last"],
             ["u8", "next_hop_weight"],
+            ["u8", "next_hop_preference"],
             ["u8", "dst_address_length"],
             ["u8", "dst_address", 16],
             ["u8", "next_hop_address", 16],
             ["u8", "next_hop_n_out_labels"],
             ["u32", "next_hop_via_label"],
             ["u32", "next_hop_out_label_stack", 0, "next_hop_n_out_labels"],
-            {"crc" : "0xa0ab24bf"}
+            {"crc" : "0x93e81ee6"}
         ],
         ["ip_add_del_route_reply",
             ["u16", "_vl_msg_id"],
@@ -354,5 +371,5 @@
             {"crc" : "0x6ba92c72"}
         ]
     ],
-"vl_api_version" :"0x3aeee4b5"
+"vl_api_version" :"0x3e4696de"
 }

@@ -3,64 +3,62 @@
 
     ],
     "messages" : [
-        ["vxlan_gpe_add_del_tunnel",
+        ["gtpu_add_del_tunnel",
             ["u16", "_vl_msg_id"],
             ["u32", "client_index"],
             ["u32", "context"],
+            ["u8", "is_add"],
             ["u8", "is_ipv6"],
-            ["u8", "local", 16],
-            ["u8", "remote", 16],
+            ["u8", "src_address", 16],
+            ["u8", "dst_address", 16],
             ["u32", "mcast_sw_if_index"],
             ["u32", "encap_vrf_id"],
-            ["u32", "decap_vrf_id"],
-            ["u8", "protocol"],
-            ["u32", "vni"],
-            ["u8", "is_add"],
-            {"crc" : "0xa7e7b6d6"}
+            ["u32", "decap_next_index"],
+            ["u32", "teid"],
+            {"crc" : "0x254ce0a5"}
         ],
-        ["vxlan_gpe_add_del_tunnel_reply",
+        ["gtpu_add_del_tunnel_reply",
             ["u16", "_vl_msg_id"],
             ["u32", "context"],
             ["i32", "retval"],
             ["u32", "sw_if_index"],
-            {"crc" : "0x563fedf9"}
+            {"crc" : "0xd553f0a1"}
         ],
-        ["vxlan_gpe_tunnel_dump",
+        ["gtpu_tunnel_dump",
             ["u16", "_vl_msg_id"],
             ["u32", "client_index"],
             ["u32", "context"],
             ["u32", "sw_if_index"],
-            {"crc" : "0x14423443"}
+            {"crc" : "0x96ee4bbd"}
         ],
-        ["vxlan_gpe_tunnel_details",
+        ["gtpu_tunnel_details",
             ["u16", "_vl_msg_id"],
             ["u32", "context"],
             ["u32", "sw_if_index"],
-            ["u8", "local", 16],
-            ["u8", "remote", 16],
-            ["u32", "vni"],
-            ["u8", "protocol"],
+            ["u8", "is_ipv6"],
+            ["u8", "src_address", 16],
+            ["u8", "dst_address", 16],
             ["u32", "mcast_sw_if_index"],
             ["u32", "encap_vrf_id"],
-            ["u32", "decap_vrf_id"],
-            ["u8", "is_ipv6"],
-            {"crc" : "0xeae94ff7"}
+            ["u32", "decap_next_index"],
+            ["u32", "teid"],
+            {"crc" : "0xe196852c"}
         ],
-        ["sw_interface_set_vxlan_gpe_bypass",
+        ["sw_interface_set_gtpu_bypass",
             ["u16", "_vl_msg_id"],
             ["u32", "client_index"],
             ["u32", "context"],
             ["u32", "sw_if_index"],
             ["u8", "is_ipv6"],
             ["u8", "enable"],
-            {"crc" : "0x0805e20c"}
+            {"crc" : "0xe54c24b9"}
         ],
-        ["sw_interface_set_vxlan_gpe_bypass_reply",
+        ["sw_interface_set_gtpu_bypass_reply",
             ["u16", "_vl_msg_id"],
             ["u32", "context"],
             ["i32", "retval"],
-            {"crc" : "0x31a36d27"}
+            {"crc" : "0xee5b6519"}
         ]
     ],
-"vl_api_version" :"0x29574e80"
+"vl_api_version" :"0x6ff2a5b9"
 }

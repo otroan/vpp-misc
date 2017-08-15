@@ -40,6 +40,20 @@
             ["u32", "minor"],
             {"crc" : "0x43eb59a5"}
         ],
+        ["acl_plugin_control_ping",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            {"crc" : "0xfc22c86e"}
+        ],
+        ["acl_plugin_control_ping_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            ["u32", "client_index"],
+            ["u32", "vpe_pid"],
+            {"crc" : "0xe07e9231"}
+        ],
         ["acl_add_replace",
             ["u16", "_vl_msg_id"],
             ["u32", "client_index"],
@@ -206,7 +220,22 @@
             ["u32", "count"],
             ["u32", "acls", 0, "count"],
             {"crc" : "0x6c86a56c"}
+        ],
+        ["macip_acl_interface_list_dump",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u32", "sw_if_index"],
+            {"crc" : "0x10645403"}
+        ],
+        ["macip_acl_interface_list_details",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["u32", "sw_if_index"],
+            ["u8", "count"],
+            ["u32", "acls", 0, "count"],
+            {"crc" : "0xd38dc074"}
         ]
     ],
-"vl_api_version" :"0xd2926ea7"
+"vl_api_version" :"0x076cb260"
 }

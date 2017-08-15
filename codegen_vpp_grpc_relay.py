@@ -3,7 +3,7 @@
 Plugin for generation of grpc to vpp python APIs
 It's a plugin for protoc as per https://developers.google.com/protocol-buffers/docs/reference/other
 Usage:
-     protoc --plugin=protoc-gen-custom=<script path>/protobuf-json-docs.py <proto file>
+     protoc --plugin=protoc-gen-custom=<script path>/codegen_vpp_grpc_relay.py <proto file>
 """
 
 import sys
@@ -16,7 +16,7 @@ import json
 from google.protobuf.descriptor_pb2 import DescriptorProto, EnumDescriptorProto, EnumValueDescriptorProto, FieldDescriptorProto, ServiceDescriptorProto, MethodDescriptorProto
 
 def simplify_name(name):
-    "Remove all the namespace information to make short names for Sphinx"
+    "Remove all the namespace information to make short names"
     return name.split(".")[-1]
 
 def convert_protodef_to_editable(proto):
@@ -193,14 +193,16 @@ def generate_request_response_service_class (item, package, proto_file, protofil
             service_class_code_gen += '  rv = self.vpp.%s(**grpcmsg_to_namedtuple(request, self.len_of_dict))\n' % m.name
             service_class_code_gen += '  for m in rv:\n'
             dump_reply = re.sub('dump', 'details', m.name)
-            service_class_code_gen += '    yield %s_pb2.%s(**vppmsg_to_namedtuple(m))\n' % (
-            proto_file.name.split("/")[-1].split(".")[0], dump_reply)
+            service_class_code_gen += '    yield %s_pb2.%s(**vppmsg_to_namedtuple(m,%s_pb2))\n' % (
+            proto_file.name.split("/")[-1].split(".")[0], dump_reply,
+            proto_file.name.split("/")[-1].split(".")[0])
 
         else:
             service_class_code_gen += ' def %s (self, request, context):\n' % m.name
             service_class_code_gen += '  rv = self.vpp.%s(**grpcmsg_to_namedtuple(request, self.len_of_dict))\n' % m.name
-            service_class_code_gen += '  return %s_pb2.%s_reply(**vppmsg_to_namedtuple(rv))\n' % (
-            (proto_file.name.split("/")[-1].split(".")[0], m.name))
+            service_class_code_gen += '  return %s_pb2.%s_reply(**vppmsg_to_namedtuple(rv,%s_pb2))\n' % (
+            (proto_file.name.split("/")[-1].split(".")[0], m.name,
+             proto_file.name.split("/")[-1].split(".")[0]))
     return(service_class_code_gen)
 
 def generate_subscriber_service_class (item, package, proto_file, protofile_grpc):
@@ -223,8 +225,9 @@ def generate_subscriber_service_class (item, package, proto_file, protofile_grpc
     service_class_code_gen += '  self.subscription_db =[]\n'
     service_class_code_gen += ' def publish_events(self, msgname, result):\n'
     service_class_code_gen += '  print(\'Publishing event %s\' % msgname)\n'
-    service_class_code_gen += "  notification_event = getattr(%s_pb2,msgname)(**vppmsg_to_namedtuple(result))\n" % \
-                              ((proto_file.name.split("/")[-1].split(".")[0]))
+    service_class_code_gen += "  notification_event = getattr(%s_pb2,msgname)(**vppmsg_to_namedtuple(result,%s_pb2))\n" % \
+                              ((proto_file.name.split("/")[-1].split(".")[0],
+                                proto_file.name.split("/")[-1].split(".")[0]))
     #service_class_code_gen += '  for client_stub in self.subscription_db[msgname]:\n'
     # TODO: refine this, if a client subscribes to one event it receives all notifications for the class
     service_class_code_gen += '  for client_stub in self.subscription_db[:]:\n'
@@ -246,8 +249,8 @@ def generate_subscriber_service_class (item, package, proto_file, protofile_grpc
         service_class_code_gen += '  self.subscription_db.append(stub)\n'
         service_class_code_gen += '  rv = self.vpp.%s(**grpcmsg_to_namedtuple(request, self.len_of_dict, subscribe=True))\n'\
                                   % m.name
-        service_class_code_gen += '  return %s_pb2.%s_reply(**vppmsg_to_namedtuple(rv))\n' % (
-        (proto_file.name.split("/")[-1].split(".")[0], m.name))
+        service_class_code_gen += '  return %s_pb2.%s_reply(**vppmsg_to_namedtuple(rv, %s_pb2))\n' % (
+        (proto_file.name.split("/")[-1].split(".")[0], m.name, proto_file.name.split("/")[-1].split(".")[0]))
     return(service_class_code_gen)
 
 def generate_code(request, response):

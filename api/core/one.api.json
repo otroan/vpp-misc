@@ -13,6 +13,11 @@
             ["u8", "addr", 16],
             {"crc" : "0xce284680"}
         ],
+        ["one_l2_arp_entry",
+            ["u8", "mac", 6],
+            ["u32", "ip4"],
+            {"crc" : "0xe242c2cf"}
+        ],
         ["one_adjacency",
             ["u8", "eid_type"],
             ["u8", "reid", 16],
@@ -77,6 +82,32 @@
             ["i32", "retval"],
             {"crc" : "0xb0e4330b"}
         ],
+        ["one_map_register_set_ttl",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u32", "ttl"],
+            {"crc" : "0xaa9edc77"}
+        ],
+        ["one_map_register_set_ttl_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0xf62b964e"}
+        ],
+        ["show_one_map_register_ttl",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            {"crc" : "0x275be0f7"}
+        ],
+        ["show_one_map_register_ttl_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            ["u32", "ttl"],
+            {"crc" : "0x17837136"}
+        ],
         ["one_add_del_map_server",
             ["u16", "_vl_msg_id"],
             ["u32", "client_index"],
@@ -119,6 +150,20 @@
             ["u32", "context"],
             ["i32", "retval"],
             {"crc" : "0x000bda40"}
+        ],
+        ["one_nsh_set_locator_set",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u8", "is_add"],
+            ["u8", "ls_name", 64],
+            {"crc" : "0x70487f3b"}
+        ],
+        ["one_nsh_set_locator_set_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0x58606afb"}
         ],
         ["one_pitr_set_locator_set",
             ["u16", "_vl_msg_id"],
@@ -265,6 +310,51 @@
             ["u32", "context"],
             ["i32", "retval"],
             {"crc" : "0xe23807e0"}
+        ],
+        ["one_add_del_l2_arp_entry",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u8", "is_add"],
+            ["u8", "mac", 6],
+            ["u32", "bd"],
+            ["u32", "ip4"],
+            {"crc" : "0x60c76a18"}
+        ],
+        ["one_add_del_l2_arp_entry_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0xddcfb571"}
+        ],
+        ["one_l2_arp_entries_get",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u32", "bd"],
+            {"crc" : "0xa1d3eb74"}
+        ],
+        ["one_l2_arp_entries_get_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            ["u32", "count"],
+            ["vl_api_one_l2_arp_entry_t", "entries", 0, "count"],
+            {"crc" : "0x45c91753"}
+        ],
+        ["one_l2_arp_bd_get",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            {"crc" : "0xb37527e1"}
+        ],
+        ["one_l2_arp_bd_get_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            ["u32", "count"],
+            ["u32", "bridge_domains", 0, "count"],
+            {"crc" : "0x63372c9c"}
         ],
         ["one_add_del_adjacency",
             ["u16", "_vl_msg_id"],
@@ -475,6 +565,20 @@
             ["u8", "locator_set_name", 64],
             {"crc" : "0xd45b9cde"}
         ],
+        ["show_one_nsh_mapping",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            {"crc" : "0x10083094"}
+        ],
+        ["show_one_nsh_mapping_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            ["u8", "is_set"],
+            ["u8", "locator_set_name", 64],
+            {"crc" : "0x4bce982f"}
+        ],
         ["show_one_pitr",
             ["u16", "_vl_msg_id"],
             ["u32", "client_index"],
@@ -548,7 +652,33 @@
             ["i32", "retval"],
             ["u8", "is_en"],
             {"crc" : "0x7f197887"}
+        ],
+        ["one_map_register_fallback_threshold",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u32", "value"],
+            {"crc" : "0xc9ea793a"}
+        ],
+        ["one_map_register_fallback_threshold_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0x929bb0fc"}
+        ],
+        ["show_one_map_register_fallback_threshold",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            {"crc" : "0xed361e58"}
+        ],
+        ["show_one_map_register_fallback_threshold_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            ["u32", "value"],
+            {"crc" : "0xd2294e16"}
         ]
     ],
-"vl_api_version" :"0x71f94795"
+"vl_api_version" :"0xe0f9f523"
 }

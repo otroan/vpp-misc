@@ -3,9 +3,9 @@ import time
 import fnmatch
 import grpc
 import os
-from google.protobuf import descriptor
 import re
 import sys
+import inspect
 import types
 sys.path.append('./build')
 
@@ -35,12 +35,28 @@ def grpcmsg_to_namedtuple(obj, len_of_dict, subscribe=False):
       #print (' %s: %s = %s' % (i.type, i.name, pr[i.name]))
   return(pr)
    
-def vppmsg_to_namedtuple(obj):
+def vppmsg_to_namedtuple(obj, grpc_module_name):
   pr = {}
   for name,value in obj.__dict__.iteritems():
     if not name.startswith('_'):
-      pr[name] = value
       #print(name, value, type(value))
+      if isinstance(value, list) and getattr(value[0], '__module__', None) == "vpp_papi":
+        #if isinstance(value, list) and inspect.isclass(value[0]):
+        #convert from vpp_papi to grpc_module_name
+        new_value = []
+        for element in value:
+            new_value.append(getattr(grpc_module_name, element.__class__.__name__)
+                             (**vppmsg_to_namedtuple(element,grpc_module_name)))
+        #print(type(new_value[0]))
+        pr[name] = new_value
+      elif getattr(value, '__module__', None) == "vpp_papi":
+        #elif inspect.isclass(value):
+        #convert from vpp_papi to grpc_module_name
+        new_value = getattr(grpc_module_name, value.__class__.__name__)(**vppmsg_to_namedtuple(value,grpc_module_name))
+        #print(type(new_value))
+        pr[name] = new_value
+      else:
+        pr[name] = value
   return pr
 
 results = []

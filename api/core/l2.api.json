@@ -1,6 +1,18 @@
 {
     "types" : [
-
+        ["mac_entry",
+            ["u32", "sw_if_index"],
+            ["u8", "mac_addr", 6],
+            ["u8", "is_del"],
+            ["u8", "spare"],
+            {"crc" : "0xa741caef"}
+        ],
+        ["bridge_domain_sw_if",
+            ["u32", "context"],
+            ["u32", "sw_if_index"],
+            ["u8", "shg"],
+            {"crc" : "0x89a002d4"}
+        ]
     ],
     "messages" : [
         ["l2_xconnect_details",
@@ -16,7 +28,7 @@
             ["u32", "context"],
             {"crc" : "0x794eaafb"}
         ],
-        ["l2_fib_table_entry",
+        ["l2_fib_table_details",
             ["u16", "_vl_msg_id"],
             ["u32", "context"],
             ["u32", "bd_id"],
@@ -25,7 +37,7 @@
             ["u8", "static_mac"],
             ["u8", "filter_mac"],
             ["u8", "bvi_mac"],
-            {"crc" : "0x9d6b8da5"}
+            {"crc" : "0x07426ad7"}
         ],
         ["l2_fib_table_dump",
             ["u16", "_vl_msg_id"],
@@ -45,6 +57,18 @@
             ["u32", "context"],
             ["i32", "retval"],
             {"crc" : "0x0425b038"}
+        ],
+        ["l2fib_flush_all",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            {"crc" : "0xabc3e39e"}
+        ],
+        ["l2fib_flush_all_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0xef3a3245"}
         ],
         ["l2fib_flush_bd",
             ["u16", "_vl_msg_id"],
@@ -90,6 +114,31 @@
             ["u32", "context"],
             ["i32", "retval"],
             {"crc" : "0x1be0875a"}
+        ],
+        ["want_l2_macs_events",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "context"],
+            ["u32", "learn_limit"],
+            ["u8", "scan_delay"],
+            ["u8", "max_macs_in_event"],
+            ["u8", "enable_disable"],
+            ["u32", "pid"],
+            {"crc" : "0xc043c52c"}
+        ],
+        ["want_l2_macs_events_reply",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["i32", "retval"],
+            {"crc" : "0x97d6535f"}
+        ],
+        ["l2_macs_event",
+            ["u16", "_vl_msg_id"],
+            ["u32", "client_index"],
+            ["u32", "pid"],
+            ["u32", "n_macs"],
+            ["vl_api_mac_entry_t", "mac", 0, "n_macs"],
+            {"crc" : "0x2a1cc4f5"}
         ],
         ["l2_flags",
             ["u16", "_vl_msg_id"],
@@ -160,15 +209,8 @@
             ["u8", "mac_age"],
             ["u32", "bvi_sw_if_index"],
             ["u32", "n_sw_ifs"],
-            {"crc" : "0xc68cb6d1"}
-        ],
-        ["bridge_domain_sw_if_details",
-            ["u16", "_vl_msg_id"],
-            ["u32", "context"],
-            ["u32", "bd_id"],
-            ["u32", "sw_if_index"],
-            ["u8", "shg"],
-            {"crc" : "0xc95a6381"}
+            ["vl_api_bridge_domain_sw_if_t", "sw_if_details", 0, "n_sw_ifs"],
+            {"crc" : "0x1840bc8b"}
         ],
         ["bridge_flags",
             ["u16", "_vl_msg_id"],
@@ -223,5 +265,5 @@
             {"crc" : "0x2d083312"}
         ]
     ],
-"vl_api_version" :"0xe1331edd"
+"vl_api_version" :"0x7bf05f3c"
 }

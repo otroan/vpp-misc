@@ -59,11 +59,11 @@
             ["u8", "data", 0],
             {"crc" : "0xe17d6c23"}
         ],
-        ["rpc_reply",
+        ["rpc_call_reply",
             ["u16", "_vl_msg_id"],
-            ["i32", "retval"],
             ["u32", "context"],
-            {"crc" : "0x966bd80d"}
+            ["i32", "retval"],
+            {"crc" : "0x45621c6a"}
         ],
         ["get_first_msg_id",
             ["u16", "_vl_msg_id"],
@@ -90,5 +90,5 @@
             {"crc" : "0x12ce6ba5"}
         ]
     ],
-"vl_api_version" :"0xaf957c24"
+"vl_api_version" :"0x6408124c"
 }

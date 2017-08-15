@@ -9,9 +9,7 @@
             ["u32", "context"],
             ["u32", "sw_if_index"],
             ["u8", "admin_up_down"],
-            ["u8", "link_up_down"],
-            ["u8", "deleted"],
-            {"crc" : "0xc230f9b1"}
+            {"crc" : "0xf890584a"}
         ],
         ["sw_interface_set_flags_reply",
             ["u16", "_vl_msg_id"],
@@ -32,6 +30,15 @@
             ["u32", "context"],
             ["i32", "retval"],
             {"crc" : "0x0cc22552"}
+        ],
+        ["sw_interface_event",
+            ["u16", "_vl_msg_id"],
+            ["u32", "context"],
+            ["u32", "sw_if_index"],
+            ["u8", "admin_up_down"],
+            ["u8", "link_up_down"],
+            ["u8", "deleted"],
+            {"crc" : "0x24638f0b"}
         ],
         ["want_interface_events",
             ["u16", "_vl_msg_id"],
@@ -138,7 +145,7 @@
             ["u32", "vrf_id"],
             {"crc" : "0xab44111d"}
         ],
-        ["sw_interface_set_unnumbered",
+       ["sw_interface_set_unnumbered",
             ["u16", "_vl_msg_id"],
             ["u32", "client_index"],
             ["u32", "context"],
@@ -196,5 +203,5 @@
             {"crc" : "0x9dc8a452"}
         ]
     ],
-"vl_api_version" :"0x8fba8acf"
+"vl_api_version" :"0x678d7fbc"
 }

@@ -23,8 +23,11 @@ messages = {}
 unknown_messages = []
 notification_messages = []
 
-exceptions = {'l2_fib_table_dump' : 'l2_fib_table_entry',
-              'cli_request' : 'cli_reply'}
+exceptions = {'cli_request' : 'cli_reply'}
+
+notification_exception = {'want_bfd_events':['bfd_udp_session_details'],
+                          'want_interface_events':['']}
+
 
 def __struct (t, n = None, e = -1, vl = None):
     base_types = { 'u8' : 'uint32',
@@ -157,7 +160,7 @@ def print_pubsub_services():
         notification_msg = re.sub('s$','', notification_msg)
         if notification_msg in messages:
             notification_messages.append(notification_msg)
-            print('  //WARNING now notification_messages is ' + notification_msg)
+            print('  //INFO now notification_messages is ' + notification_msg)
         else:
             print('  //WARNING now notification_msg not found ' + notification_msg)
         request = name + '_request'
