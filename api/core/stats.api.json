@@ -27,9 +27,30 @@
             ["u64", "packets"],
             ["u64", "bytes"],
             {"crc" : "0xefca741e"}
+        ],
+	["vlib_counter",
+            ["u64", "packets"],
+            ["u64", "bytes"],
+            {"crc" : "0x62db67f0"}
         ]
     ],
     "messages" : [
+	["vnet_interface_simple_counters",
+            ["u16", "_vl_msg_id"],
+            ["u8", "vnet_counter_type"],
+            ["u32", "first_sw_if_index"],
+            ["u32", "count"],
+            ["u64", "data", 0, "count"],
+            {"crc" : "0x302f0983"}
+        ],
+        ["vnet_interface_combined_counters",
+            ["u16", "_vl_msg_id"],
+            ["u8", "vnet_counter_type"],
+            ["u32", "first_sw_if_index"],
+            ["u32", "count"],
+            ["vl_api_vlib_counter_t", "data", 0, "count"],
+            {"crc" : "0xd82426e3"}
+        ],
         ["want_stats",
             ["u16", "_vl_msg_id"],
             ["u32", "client_index"],
