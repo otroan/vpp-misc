@@ -14,6 +14,8 @@ import vpe_pb2
 import vpe_pb2_grpc
 import interface_pb2
 import interface_pb2_grpc
+import stats_pb2
+import stats_pb2_grpc
 from  prettytable import PrettyTable
 import time
 
@@ -61,13 +63,13 @@ def run():
 
   # Subscribe to interface stats
 
-  subscriber_stub = vpe_pb2_grpc.vpe_subscribeStub(channel)
+  subscriber_stub = stats_pb2_grpc.stats_subscribeStub(channel)
   s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   s.connect((test_server, int(test_server_port)))
   grpc_target = s.getsockname()[0] + ':' + test_local_port
   s.close()
   print(grpc_target)
-  subscriber_stub.want_stats(vpe_pb2.want_stats_request(enable_disable=1,
+  subscriber_stub.want_stats(stats_pb2.want_stats_request(enable_disable=1,
                                                         grpc_target=grpc_target))
   interface_subscriber = interface_pb2_grpc.interface_subscribeStub(channel)
   interface_subscriber.want_interface_events(interface_pb2.want_interface_events_request(enable_disable=1,
@@ -78,20 +80,20 @@ class interfaceClientNotificationsServicer(interface_pb2_grpc.interface_notifica
     print(request)
     return (interface_pb2.interface_vpp_notification_ack(ack=True))
 
-class vpeNotificationServicer(vpe_pb2_grpc.vpe_notificationsServicer):
+class statsNotificationServicer(stats_pb2_grpc.stats_notificationsServicer):
   def vnet_interface_counters_notification(self, request, context):
     print(request)
-    return vpe_pb2.vpe_vpp_notification_ack(ack=1)
+    return stats_pb2.stats_vpp_notification_ack(ack=1)
 
   def vnet_interface_combined_counters_notification(self, request, context):
     print("Vnet counter type ", request.vnet_counter_type)
     print("Number of interface counters received = ", request.count)
-    return vpe_pb2.vpe_vpp_notification_ack(ack=1)
+    return stats_pb2.stats_vpp_notification_ack(ack=1)
 
   def vnet_interface_simple_counters_notification(self, request, context):
     print("Vnet counter type ", request.vnet_counter_type)
     print("Number of interface counters received = ",request.count)
-    return vpe_pb2.vpe_vpp_notification_ack(ack=1)
+    return stats_pb2.stats_vpp_notification_ack(ack=1)
 
 if __name__ == '__main__':
   parser = ArgumentParser()
@@ -110,8 +112,8 @@ if __name__ == '__main__':
     test_local_port = args.local_port
 
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-  vpe_pb2_grpc.add_vpe_notificationsServicer_to_server(
-    vpeNotificationServicer(), server)
+  stats_pb2_grpc.add_stats_notificationsServicer_to_server(
+    statsNotificationServicer(), server)
   interface_pb2_grpc.add_interface_notificationsServicer_to_server(
     interfaceClientNotificationsServicer(),server)
   server.add_insecure_port('[::]:'+test_local_port)
