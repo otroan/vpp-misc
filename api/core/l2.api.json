@@ -181,8 +181,9 @@
             ["u8", "learn"],
             ["u8", "arp_term"],
             ["u8", "mac_age"],
+            ["u8", "bd_tag", 64],
             ["u8", "is_add"],
-            {"crc" : "0xbddc9ff1"}
+            {"crc" : "0xe9894b51"}
         ],
         ["bridge_domain_add_del_reply",
             ["u16", "_vl_msg_id"],
@@ -207,10 +208,11 @@
             ["u8", "learn"],
             ["u8", "arp_term"],
             ["u8", "mac_age"],
+            ["u8", "bd_tag", 64],
             ["u32", "bvi_sw_if_index"],
             ["u32", "n_sw_ifs"],
             ["vl_api_bridge_domain_sw_if_t", "sw_if_details", 0, "n_sw_ifs"],
-            {"crc" : "0x1840bc8b"}
+            {"crc" : "0xff7d2b54"}
         ],
         ["bridge_flags",
             ["u16", "_vl_msg_id"],
@@ -265,5 +267,5 @@
             {"crc" : "0x2d083312"}
         ]
     ],
-"vl_api_version" :"0x7bf05f3c"
+"vl_api_version" :"0x57745ea6"
 }
