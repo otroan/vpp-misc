@@ -202,7 +202,8 @@ GRE
 
 Feature maturity level: production  
 Supports: API CLI MULTITHREAD  
-Not yet implemented:
+
+Not yet implemented:  
 - GRE keys
 
 # IP Neighbour Database
@@ -243,7 +244,8 @@ border relay of 6RD (RFC5969).
 
 Feature maturity level: production  
 Supports: API CLI STATS MULTITHREAD  
-Not yet implemented:
+
+Not yet implemented:  
 - Tunnel PMTUD
 - Tracking of FIB state for tunnel state
 - IPv6 extension headers (Tunnel encapsulation limit option)
@@ -258,7 +260,8 @@ IPFIX flow probe. Works in the L2, or IP input feature path.
 
 Feature maturity level: production  
 Supports: API CLI STATS MULTITHREAD  
-Not yet implemented:
+
+Not yet implemented:  
 - Output path
 - Export over IPv6
 - Export over TCP/SCTP
@@ -444,7 +447,8 @@ Create a netmap interface, which is a high speed user-space interface that allow
 
 Feature maturity level: production  
 Supports: API CLI STATS MULTITHREAD  
-Not yet implemented:
+
+Not yet implemented:  
 - API dump
 
 # Network Address Translation (NAT)
@@ -497,7 +501,8 @@ Create a pipe device interface, which can pass packets bidirectionally in one si
 
 Feature maturity level: production  
 Supports: API CLI STATS MULTITHREAD  
-Not yet implemented:
+
+Not yet implemented:  
 - does not use hw-address
 - does not support tagged traffic
 - API dump filtering by sw_if_index
@@ -574,7 +579,8 @@ Create a tap v2 device interface, which connects to a tap interface on the host 
 
 Feature maturity level: production  
 Supports: API CLI STATS MULTITHREAD  
-Not yet implemented:
+
+Not yet implemented:  
 - API dump filtering by sw_if_index
 
 # Time-range-based MAC-address filter (mactime)
@@ -646,7 +652,8 @@ Create a virtio-backed PCI device interface
 
 Feature maturity level: production  
 Supports: API CLI STATS MULTITHREAD  
-Not yet implemented:
+
+Not yet implemented:  
 - API dump filtering by sw_if_index
 
 # Virtual eXtensible LAN (VXLAN)
@@ -680,7 +687,8 @@ Create a host interface that will attach to a linux AF_PACKET interface, one sid
 
 Feature maturity level: production  
 Supports: API CLI STATS MULTITHREAD  
-Not yet implemented:
+
+Not yet implemented:  
 - API dump details beyond sw_if_index and name
 
 # rdma device driver
